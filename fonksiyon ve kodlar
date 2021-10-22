@@ -1,0 +1,79 @@
+###verilen iki noktayı birleştiren doğrunun eğimini hesaplar (pozitif ise sağa doğru,negatif ise sola doğru)
+def eğim_hesapla(corner1,corner2):
+  global eğim
+  y_fark = corner1[1]-corner2[1]
+  x_fark = corner2[0]-corner1[0]
+  if x_fark==0:
+    eğim = 0
+  else:
+    eğim = y_fark/x_fark
+  return (eğim)
+
+##verilen iki nokta arasındaki açıyı hesaplar (dönüşün keskinliği)
+def arctan_hesaplama(nokta1,nokta2):
+    y_fark = abs(nokta1[1]-nokta2[1])
+    x_fark = abs(nokta1[0]-nokta2[0])
+    alpha = np.arctan(y_fark/x_fark)
+    alpha = 90-(alpha*(180/(22/7)))
+    print(alpha)
+
+
+##verilen threshold resimde siyah-beyaz geçiş yerlerini tespit eder ve noktaların x'ini köşeler listesine y'sini köşeler2 listesine kaydeder.
+def geçiş_tespit(output2):
+  köşeler = []
+  köşeler2 = []
+  if output2[0,0] == 0:
+    ilk_kare = "black"
+  elif output2[0,0]==255:
+    ilk_kare = "white"
+  ##resmin 1. matrix'inin renk değerini bulma
+
+  ex_value_str = ilk_kare
+  for i in range(output2.shape[0]):
+    for v in range(output2.shape[1]):
+      if output2[i,v]==255:
+        if ex_value_str == "black":
+          köşeler.append(i)
+          köşeler2.append(v)
+          ex_value_str = "white"
+        elif ex_value_str == "white":
+          pass
+      elif output2[i,v]== 0:
+        if ex_value_str== "white":
+          köşeler.append(i)
+          köşeler2.append(v)
+          ex_value_str = "black"
+        elif ex_value_str == "black":
+          pass
+
+
+
+
+def köşe_belirleme(liste_x,liste_y):
+  fark = abs(np.min(liste_y)-np.max(liste_y))
+  EP = fark*5/100
+  alt_sınır = np.max(liste_y)-EP
+  üst_sınır = np.min(liste_y)+EP
+  alt_noktalar = np.min(np.where(liste_y>alt_sınır))
+  üst_noktalar = np.max(np.where(liste_y<üst_sınır))
+  odak_liste_üst_y = liste_y[:üst_noktalar]
+  odak_liste_üst_x = liste_x[:üst_noktalar]
+
+  odak_liste_alt_x = liste_x[alt_noktalar:]
+  odak_liste_alt_y = liste_y[alt_noktalar:]
+
+  sol_üst_köşe = [np.min(odak_liste_üst_x),np.min(odak_liste_üst_y)]
+  sağ_üst_köşe = [np.max(odak_liste_üst_x),np.min(odak_liste_üst_y)]
+
+  sol_alt_köşe = [np.min(odak_liste_alt_x),np.max(odak_liste_alt_y)]
+  sağ_alt_köşe = [np.max(odak_liste_alt_x),np.max(odak_liste_alt_y)]
+
+  return (sol_üst_köşe,sağ_üst_köşe,sol_alt_köşe,sağ_alt_köşe)
+  
+def nokta_koy(im,solü,sağü,sola,sağa):
+  cv2.circle(im,(solü[0],solü[1]),7,(0,0,255),-1) ###sağ alt
+  cv2.circle(im,(sağü[0],sağü[1]),7,(0,0,255),-1) ###sol üst
+
+  cv2.circle(im,(sola[0],sola[1]),7,(0,0,255),-1) ###sol alt
+  cv2.circle(im,(sağa[0],sağa[1]),7,(0,0,255),-1) ###sağ üst
+  cv2_imshow(im)
